@@ -19,29 +19,86 @@ enum class StPrice : int
     Cheap
 };
 
+enum class UsingMethodEnum : int
+{
+    Writing,
+    Drawing,
+    Coloring
+};
+
+class UsingStrategy
+{
+public:
+    virtual ~UsingStrategy() {}
+    virtual void Use() = 0;
+};
+
+class WritingUsingStrategy : public UsingStrategy
+{
+    void Use() { cout << "Write on paper; "; }
+};
+
+class DrawingUsingStrategy : public UsingStrategy
+{
+    void Use() { cout << "Draw in a notebook; "; }
+};
+
+class ColoringUsingStrategy : public UsingStrategy
+{
+    void Use() { cout << "Color the picture; "; }
+};
+
+//фабричный метод
+UsingStrategy *CreateUsingStrategy(UsingMethodEnum usingMethod)
+{
+    switch(usingMethod)
+    {
+        case UsingMethodEnum::Coloring: return new ColoringUsingStrategy;
+        case UsingMethodEnum::Drawing: return new DrawingUsingStrategy;
+        case UsingMethodEnum::Writing: return new WritingUsingStrategy;
+
+        default: return nullptr;
+    }
+}
+
 class Stationery
 {
 private:
     StColor Color;
     StPrice AllPrice;
 
+    UsingStrategy *UsingMethod;
+
 protected:
     bool StWritesGood;
 
 public:
     Stationery(StColor color, StPrice price)
-    : Color(color), AllPrice(price), StWritesGood(false)
+    : Color(color), AllPrice(price), StWritesGood(false), UsingMethod(nullptr)
     {
         StWritesGood = static_cast<bool>(rand()%2);
     }
 
-    virtual ~Stationery() {} //деструктор
+    virtual ~Stationery() //деструктор
+    {
+        if(UsingMethod != nullptr) delete UsingMethod;
+    }
 
     StColor GetColor() const {return Color;}
     bool Write() const { return StWritesGood; }
     StPrice GetPrice() const {return AllPrice;}
     virtual void Use()
     {
+        if (UsingMethod == nullptr)
+        {
+            cout << "Do nothing";
+            return;
+        }
+        else
+        {
+            UsingMethod->Use();
+        }
+
         if (Write())
         {
             cout << "Using a good writing stationery; ";
@@ -52,6 +109,7 @@ public:
         }
     }
 
+    void SetUsingMethod(UsingStrategy *usingMethod) { UsingMethod = usingMethod; }
 };
 
 class Pen : public Stationery
@@ -65,13 +123,14 @@ public:
 
 Pen::Pen() : Stationery(StColor::Blue, StPrice::Expensive)
 {
-
+    SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Writing));
 }
 
 void Pen::Use()
 {
+    cout << "The PEN writes; ";
     Stationery::Use();
-    cout << "The pen writes" << endl;
+    cout<<endl;
 }
 
 class Pencil : public Stationery
@@ -85,13 +144,14 @@ public:
 
 Pencil::Pencil() : Stationery(StColor::Black, StPrice::Cheap)
 {
-
+    SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Drawing));
 }
 
 void Pencil::Use()
 {
+    cout << "PENCIL draws; ";
     Stationery::Use();
-    cout << "Pencil draws" << endl;
+    cout<<endl;
 }
 
 class Marker : public Stationery
@@ -106,13 +166,14 @@ public:
 
 Marker::Marker() : Stationery(StColor::Yellow, StPrice::Expensive)
 {
-
+    SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Coloring));
 }
 
 void Marker::Use()
 {
+    cout << "MARKER colors; ";
     Stationery::Use();
-    cout << "Marker draws" << endl;
+    cout<<endl;
 }
 
 enum class StationeryType : int
@@ -248,8 +309,11 @@ int main()
         int number = rand()%3+1;
         StationeryType st_type = static_cast<StationeryType>(number);
         Stationery *st_1 = Create(st_type);
+        //st_1->SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Writing));
         st_array.AddPredmet_2(st_1);
     }
+
+
 
     wcout << "»спользуем все предметы с помощью итератора:" << endl << endl;
     Iterator<Stationery*> *all = st_array.GetIterator();
@@ -257,7 +321,7 @@ int main()
     delete all;
     cout << endl << endl;
 
-    wcout << "»спользуем хорошо пишущую канцел€рию:" << endl << endl;
+    /*wcout << "»спользуем хорошо пишущую канцел€рию:" << endl << endl;
     Iterator<Stationery*> *good = new StGoodDecorator(st_array.GetIterator(), true);
     UsesAll(good);
     delete good;
@@ -300,7 +364,7 @@ int main()
      StPrice::Expensive),
      true);
      UsesAll(adapterGoodExBlue);
-     delete adapterGoodExBlue;
+     delete adapterGoodExBlue;*/
 
 
 
