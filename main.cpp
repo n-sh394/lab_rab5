@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 enum class StColor : int
 {
     Blue,
@@ -35,17 +36,17 @@ public:
 
 class WritingUsingStrategy : public UsingStrategy
 {
-    void Use() { cout << "Write on paper; "; }
+    void Use() { cout << "Write on paper"; }
 };
 
 class DrawingUsingStrategy : public UsingStrategy
 {
-    void Use() { cout << "Draw in a notebook; "; }
+    void Use() { cout << "Draw in a notebook"; }
 };
 
 class ColoringUsingStrategy : public UsingStrategy
 {
-    void Use() { cout << "Color the picture; "; }
+    void Use() { cout << "Color the picture"; }
 };
 
 //фабричный метод
@@ -69,6 +70,36 @@ private:
 
     UsingStrategy *UsingMethod;
 
+    void DoUsingStrategy()
+    {
+        if (UsingMethod == nullptr)
+        {
+            cout << "Do nothing";
+            return;
+        }
+        else
+        {
+            UsingMethod->Use();
+        }
+    };
+
+    void GoodOrBad()
+    {
+        if (Write())
+        {
+            cout << "Using a good writing stationery";
+        }
+        else
+        {
+            cout << "Using a bad writing stationery";
+        }
+    };
+
+    void Proverka()
+    {
+        cout << "Proveryaem predmet";
+    };
+
 protected:
     bool StWritesGood;
 
@@ -87,26 +118,29 @@ public:
     StColor GetColor() const {return Color;}
     bool Write() const { return StWritesGood; }
     StPrice GetPrice() const {return AllPrice;}
-    virtual void Use()
+    virtual void Name() = 0;
+    virtual void Podgotovka() = 0;
+    void Use()
     {
-        if (UsingMethod == nullptr)
-        {
-            cout << "Do nothing";
-            return;
-        }
-        else
-        {
-            UsingMethod->Use();
-        }
+        //1. Вывести название предметов
+        Name();
+        cout << "; ";
 
-        if (Write())
-        {
-            cout << "Using a good writing stationery; ";
-        }
-        else
-        {
-            cout << "Using a bad writing stationery; ";
-        }
+        //2. Подготовить предмет к использованию
+        Podgotovka();
+        cout << "; ";
+
+        //3. Попробовать использовать предмет на листе
+        Proverka();
+        cout << " ; ";
+
+        //4. Определить хорошо ли пишет предмет
+        GoodOrBad();
+        cout << "; ";
+
+        //5. Использовать предмет по назначению
+        DoUsingStrategy();
+        cout << endl;
     }
 
     void SetUsingMethod(UsingStrategy *usingMethod) { UsingMethod = usingMethod; }
@@ -118,7 +152,8 @@ public:
     Pen();
     ~Pen() {}
 
-    void Use() override;
+    void Name() { cout << "PEN"; }
+    void Podgotovka() { cout << "Snyat kolpachok"; }
 };
 
 Pen::Pen() : Stationery(StColor::Blue, StPrice::Expensive)
@@ -126,12 +161,6 @@ Pen::Pen() : Stationery(StColor::Blue, StPrice::Expensive)
     SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Writing));
 }
 
-void Pen::Use()
-{
-    cout << "The PEN writes; ";
-    Stationery::Use();
-    cout<<endl;
-}
 
 class Pencil : public Stationery
 {
@@ -139,7 +168,8 @@ public:
     Pencil();
     ~Pencil() {}
 
-    void Use() override;
+    void Name() { cout << "PENCIL"; }
+    void Podgotovka() { cout << "Podtochit"; }
 };
 
 Pencil::Pencil() : Stationery(StColor::Black, StPrice::Cheap)
@@ -147,12 +177,6 @@ Pencil::Pencil() : Stationery(StColor::Black, StPrice::Cheap)
     SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Drawing));
 }
 
-void Pencil::Use()
-{
-    cout << "PENCIL draws; ";
-    Stationery::Use();
-    cout<<endl;
-}
 
 class Marker : public Stationery
 {
@@ -160,21 +184,15 @@ public:
     Marker();
     ~Marker() {}
 
-    void Use() override;
+    void Name() { cout << "MARKER"; }
+    void Podgotovka() { cout << "Vstryahnut and snyat kolpachok"; }
 };
-
 
 Marker::Marker() : Stationery(StColor::Yellow, StPrice::Expensive)
 {
     SetUsingMethod(CreateUsingStrategy(UsingMethodEnum::Coloring));
 }
 
-void Marker::Use()
-{
-    cout << "MARKER colors; ";
-    Stationery::Use();
-    cout<<endl;
-}
 
 enum class StationeryType : int
 {
